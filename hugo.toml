@@ -1,4 +1,4 @@
-baseURL = 'https://example.com/'
+baseURL = 'https://blog.notesbysandeep.com'
 languageCode = 'en-us'
 title = 'Sundeep Tech Blog'
 theme = 'cleantech'
