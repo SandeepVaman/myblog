@@ -1,0 +1,58 @@
+baseURL = 'https://example.com/'
+languageCode = 'en-us'
+title = 'Sundeep Tech Blog'
+theme = 'cleantech'
+
+# Pagination
+[pagination]
+  pagerSize = 10
+
+# Taxonomies
+[taxonomies]
+  tag = 'tags'
+  category = 'categories'
+
+# Syntax highlighting
+[markup]
+  [markup.highlight]
+    style = 'dracula'
+    lineNos = false
+    guessSyntax = true
+    noClasses = true
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+  [markup.goldmark.renderer]
+    unsafe = true
+
+# Menu
+[menus]
+  [[menus.main]]
+    name = 'Home'
+    pageRef = '/'
+    weight = 10
+
+  [[menus.main]]
+    name = 'Posts'
+    pageRef = '/posts'
+    weight = 20
+
+  [[menus.main]]
+    name = 'Tags'
+    pageRef = '/tags'
+    weight = 30
+
+  [[menus.main]]
+    name = 'About'
+    pageRef = '/about'
+    weight = 40
+
+# Site params
+[params]
+  description = 'A tech blog about software engineering, distributed systems, and more.'
+  author = 'Sundeep'
+
+  [params.social]
+    # github = 'yourusername'
+    # twitter = 'yourusername'
+    # linkedin = 'yourusername'

@@ -1,0 +1,69 @@
+{{ define "main" }}
+  <article class="single-post">
+    <header class="post-header">
+      <h1 class="post-title">{{ .Title }}</h1>
+      {{ if not .Params.hideMetadata }}
+      <div class="post-meta">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+        {{ if ne (.Lastmod.Format "2006-01-02") (.Date.Format "2006-01-02") }}
+          <span class="meta-sep">&middot;</span>
+          <span class="updated">Updated: {{ .Lastmod.Format "January 2, 2006" }}</span>
+        {{ end }}
+        <span class="meta-sep">&middot;</span>
+        <span class="reading-time">{{ .ReadingTime }} min read</span>
+        <span class="meta-sep">&middot;</span>
+        <span class="word-count">{{ .WordCount }} words</span>
+      </div>
+      {{ end }}
+    </header>
+
+    {{/* Table of Contents */}}
+    {{ if and .Params.toc (gt .WordCount 400) }}
+    <aside class="toc">
+      <details open>
+        <summary>Table of Contents</summary>
+        {{ .TableOfContents }}
+      </details>
+    </aside>
+    {{ end }}
+
+    <div class="post-content">
+      {{ .Content }}
+    </div>
+
+    {{/* Tags */}}
+    {{ with .GetTerms "tags" }}
+    <div class="post-tags-footer">
+      <span class="tags-label">Tags:</span>
+      {{ range . }}
+        <a href="{{ .RelPermalink }}" class="tag">{{ .LinkTitle }}</a>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    {{/* Share buttons */}}
+    <div class="share-buttons">
+      <span class="share-label">Share:</span>
+      <a href="https://twitter.com/intent/tweet?url={{ .Permalink }}&text={{ .Title }}" target="_blank" rel="noopener" class="share-btn">Twitter</a>
+      <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ .Permalink }}&title={{ .Title }}" target="_blank" rel="noopener" class="share-btn">LinkedIn</a>
+      <a href="https://news.ycombinator.com/submitlink?u={{ .Permalink }}&t={{ .Title }}" target="_blank" rel="noopener" class="share-btn">Hacker News</a>
+      <a href="https://www.reddit.com/submit?url={{ .Permalink }}&title={{ .Title }}" target="_blank" rel="noopener" class="share-btn">Reddit</a>
+    </div>
+
+    {{/* Post navigation */}}
+    <nav class="post-nav">
+      {{ with .PrevInSection }}
+        <a class="post-nav-prev" href="{{ .RelPermalink }}">
+          <span class="post-nav-label">&larr; Previous</span>
+          <span class="post-nav-title">{{ .Title }}</span>
+        </a>
+      {{ end }}
+      {{ with .NextInSection }}
+        <a class="post-nav-next" href="{{ .RelPermalink }}">
+          <span class="post-nav-label">Next &rarr;</span>
+          <span class="post-nav-title">{{ .Title }}</span>
+        </a>
+      {{ end }}
+    </nav>
+  </article>
+{{ end }}

@@ -1,0 +1,36 @@
+{{ define "main" }}
+  <div class="section-container">
+    <h1 class="section-title">{{ .Title }}</h1>
+    {{ .Content }}
+    <div class="posts-list">
+      {{ $paginator := .Paginate .Pages 10 }}
+      {{ range $paginator.Pages }}
+        <article class="post-summary">
+          <h2 class="post-title">
+            <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+          </h2>
+          <div class="post-meta">
+            <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+            <span class="meta-sep">&middot;</span>
+            <span class="reading-time">{{ .ReadingTime }} min read</span>
+            <span class="meta-sep">&middot;</span>
+            <span class="word-count">{{ .WordCount }} words</span>
+          </div>
+          {{ if .Description }}
+            <p class="post-excerpt">{{ .Description }}</p>
+          {{ else }}
+            <p class="post-excerpt">{{ .Summary }}</p>
+          {{ end }}
+          {{ with .GetTerms "tags" }}
+            <div class="post-tags">
+              {{ range . }}
+                <a href="{{ .RelPermalink }}" class="tag">{{ .LinkTitle }}</a>
+              {{ end }}
+            </div>
+          {{ end }}
+        </article>
+      {{ end }}
+    </div>
+    {{ template "_internal/pagination.html" . }}
+  </div>
+{{ end }}
