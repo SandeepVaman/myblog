@@ -1,6 +1,6 @@
 baseURL = 'https://blog.notesbysandeep.com'
 languageCode = 'en-us'
-title = 'Sundeep Tech Blog'
+title = 'Build Log'
 theme = 'tech-notes'
 
 # Pagination
@@ -9,7 +9,7 @@ theme = 'tech-notes'
 
 # Taxonomies
 [taxonomies]
-  tag = 'tags'
+  playlist = 'playlists'
   category = 'categories'
 
 # Syntax highlighting

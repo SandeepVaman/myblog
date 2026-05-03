@@ -1,5 +1,4 @@
-{{- $isWide := or (eq .Section "tags") (eq .Kind "taxonomy") (eq .Kind "term") -}}
-<div class="{{ if $isWide }}shell-wide{{ else }}shell{{ end }}">
+<div class="shell-wide">
   <header class="site-header">
     <div>
       <a href="{{ "/" | relURL }}" class="wordmark">{{ site.Title }}</a>

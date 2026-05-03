@@ -206,7 +206,7 @@ a:hover { color: var(--accent); }
 /* ============================================================
    ARTICLE / SINGLE
    ============================================================ */
-.article { max-width: 680px; margin: 0 auto; }
+.article { max-width: 1100px; margin: 0 auto; }
 .article__meta {
   font-family: var(--sans);
   font-size: 11px;

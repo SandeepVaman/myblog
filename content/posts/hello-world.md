@@ -2,7 +2,7 @@
 title: "Hello World: Welcome to My Tech Blog"
 date: 2026-03-10
 description: "The very first post on this blog — what to expect and why I started writing."
-tags: ["meta", "blogging"]
+playlists: ["meta", "blogging"]
 toc: false
 ---
 

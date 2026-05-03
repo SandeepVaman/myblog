@@ -1,8 +1,8 @@
 {{- /* List page for sections like /posts/ */ -}}
 {{ define "main" }}
-<div class="shell">
+<div class="shell-wide">
   <p class="eyebrow">{{ .Title }}</p>
-  <h1 class="headline">All <em>essays</em>.</h1>
+  <h1 class="headline">All <em>logs</em>.</h1>
   {{- with .Content }}<div class="intro">{{ . }}</div>{{ end }}
 
   {{- range .Pages.ByDate.Reverse }}

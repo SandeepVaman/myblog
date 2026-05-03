@@ -14,8 +14,8 @@
     {{- end }}
     <div class="tag-row">
       <div class="tags">
-        {{- range .Params.tags }}
-          <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag">{{ . }}</a>
+        {{- range .Params.playlists }}
+          <a href="{{ "playlists/" | relURL }}{{ . | urlize }}/" class="tag">{{ . }}</a>
         {{- end }}
       </div>
       <span class="read-time">{{ .ReadingTime }} min read</span>
