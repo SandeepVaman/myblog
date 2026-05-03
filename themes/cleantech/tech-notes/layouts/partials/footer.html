@@ -1,0 +1,8 @@
+<footer class="site-footer">
+  <span>© {{ site.Title }}, {{ now.Year }}</span>
+  <span>
+    {{- with site.Params.social.github }}<a href="https://github.com/{{ . }}">GitHub</a> · {{ end -}}
+    {{- with site.Params.social.linkedin }}<a href="https://linkedin.com/in/{{ . }}">LinkedIn</a> · {{ end -}}
+    <a href="{{ "index.xml" | relURL }}">RSS</a>
+  </span>
+</footer>

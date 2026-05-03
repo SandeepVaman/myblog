@@ -1,0 +1,12 @@
+{{- /* List page for sections like /posts/ */ -}}
+{{ define "main" }}
+<div class="shell">
+  <p class="eyebrow">{{ .Title }}</p>
+  <h1 class="headline">All <em>essays</em>.</h1>
+  {{- with .Content }}<div class="intro">{{ . }}</div>{{ end }}
+
+  {{- range .Pages.ByDate.Reverse }}
+    {{ partial "post-row.html" . }}
+  {{- end }}
+</div>
+{{ end }}

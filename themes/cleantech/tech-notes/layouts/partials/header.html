@@ -1,0 +1,13 @@
+{{- $isWide := or (eq .Section "tags") (eq .Kind "taxonomy") (eq .Kind "term") -}}
+<header class="site-header {{ if $isWide }}shell-wide{{ else }}shell{{ end }}">
+  <div>
+    <a href="{{ "/" | relURL }}" class="wordmark">{{ site.Title }}</a>
+  </div>
+  <nav class="site-nav">
+    {{- range site.Menus.main }}
+      {{- $active := or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }}
+      <a href="{{ .URL | relURL }}"{{ if $active }} class="is-active"{{ end }}>{{ .Name }}</a>
+    {{- end }}
+  </nav>
+</header>
+<hr class="top-rule {{ if $isWide }}shell-wide{{ else }}shell{{ end }}">

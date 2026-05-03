@@ -1,0 +1,24 @@
+<article class="post-row">
+  <div class="post-row__date">
+    {{- $m := .Date.Format "January 2" }}
+    {{- $y := .Date.Format "2006" }}
+    {{ $m }}
+    <span class="post-row__date-year">{{ $y }}</span>
+  </div>
+  <div>
+    <h2 class="post-row__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    {{- with .Description }}
+      <p class="post-row__excerpt">{{ . }}</p>
+    {{- else }}
+      <p class="post-row__excerpt">{{ .Summary | plainify | truncate 220 }}</p>
+    {{- end }}
+    <div class="tag-row">
+      <div class="tags">
+        {{- range .Params.tags }}
+          <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag">{{ . }}</a>
+        {{- end }}
+      </div>
+      <span class="read-time">{{ .ReadingTime }} min read</span>
+    </div>
+  </div>
+</article>

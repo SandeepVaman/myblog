@@ -1,0 +1,28 @@
+{{ define "main" }}
+<article class="article">
+  <div class="article__meta">
+    <span><strong>{{ .Date.Format "January 2, 2006" }}</strong></span>
+    <span>{{ .ReadingTime }} min read</span>
+    {{- range .Params.tags }}
+      <span><a href="{{ "tags/" | relURL }}{{ . | urlize }}/">#{{ . }}</a></span>
+    {{- end }}
+  </div>
+
+  <h1 class="article__title">{{ .Title }}</h1>
+
+  {{- with .Description }}
+  <p class="article__lede">{{ . }}</p>
+  {{- end }}
+
+  <div class="article__body">
+    {{ .Content }}
+  </div>
+
+  <div class="article__footer">
+    <div>
+      <p class="eyebrow" style="margin:0 0 8px;">— Sandeep, {{ .Date.Format "January 2006" }}</p>
+    </div>
+    <div class="article__sig">Sandeep</div>
+  </div>
+</article>
+{{ end }}

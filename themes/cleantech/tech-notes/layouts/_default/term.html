@@ -1,0 +1,14 @@
+{{- /* Single tag page — /tags/databases/ — uses the homepage post-row style */ -}}
+{{ define "main" }}
+<div class="shell">
+  <p class="eyebrow">Playlist · {{ .Data.Singular | humanize | title }}</p>
+  <h1 class="headline">{{ .Title | humanize | title }}</h1>
+  <p class="intro">
+    {{ len .Pages }} essays tagged <em>{{ .Title | humanize }}</em>, in chronological order.
+  </p>
+
+  {{- range .Pages.ByDate.Reverse }}
+    {{ partial "post-row.html" . }}
+  {{- end }}
+</div>
+{{ end }}

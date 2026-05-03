@@ -1,0 +1,35 @@
+{{- /* About page — special layout, triggered by /about/ */ -}}
+{{ define "main" }}
+<div class="shell">
+  <p class="eyebrow">Colophon · Est. {{ site.Params.since | default "2019" }}</p>
+  <h1 class="headline">A slow newsletter about <em>boring</em> systems.</h1>
+
+  <div class="article__body" style="font-size: clamp(16px, 2vw, 18px); line-height: 1.7;">
+    {{ .Content }}
+  </div>
+
+  {{- with .Params.facts }}
+  <div class="about-break">§</div>
+  <h2 class="section-label">Colophon</h2>
+  <div class="facts">
+    {{- range . }}
+      <div class="fact">
+        <span class="fact__k">{{ .key }}</span>
+        <span class="fact__v">{{ .value }}</span>
+      </div>
+    {{- end }}
+  </div>
+  {{- end }}
+
+  {{- with .Params.contact }}
+  <div class="contact">
+    {{- range . }}
+      <div class="contact__item">
+        <span class="contact__k">{{ .key }}</span>
+        <span class="contact__v">{{ .value }}</span>
+      </div>
+    {{- end }}
+  </div>
+  {{- end }}
+</div>
+{{ end }}

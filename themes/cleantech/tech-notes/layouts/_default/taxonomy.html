@@ -1,0 +1,62 @@
+{{- /* Taxonomy LIST = /tags/ — rendered as the Playlists index */ -}}
+{{ define "main" }}
+<div class="shell-wide">
+  <p class="eyebrow">Curated · Updated {{ now.Format "January 2006" }}</p>
+  <h1 class="headline">Reading lists, in a <em>chosen</em> order.</h1>
+  <p class="intro">
+    Each tag is a small, opinionated path through the archive. If the front page is the <em>shelf</em>,
+    these are the <em>mixtapes</em>. Hover a card to peek inside.
+  </p>
+
+  {{- $terms := .Data.Terms.Alphabetical }}
+  {{- $totalEssays := 0 }}
+  {{- range $terms }}{{ $totalEssays = add $totalEssays .Count }}{{ end }}
+
+  <div class="pl-metabar">
+    <span><strong>{{ len $terms }}</strong> playlists</span>
+    <span><strong>{{ $totalEssays }}</strong> essays · sequenced</span>
+    <span>Hover a card to peek inside</span>
+  </div>
+
+  <div class="pl-grid">
+    {{- $marks := slice "stack" "ring" "graph" "wave" "grid" "arrow" }}
+    {{- range $i, $term := $terms }}
+      {{- $no := printf "No. %02d" (add $i 1) }}
+      {{- $mark := index $marks (mod $i (len $marks)) }}
+      {{- $totalMin := 0 }}
+      {{- range $term.Pages }}{{ $totalMin = add $totalMin .ReadingTime }}{{ end }}
+      <a class="pl-card" href="{{ $term.Page.RelPermalink }}" tabindex="0">
+        <div class="pl-cover">
+          <span class="pl-cover__tag">Playlist</span>
+          {{ partial "pl-mark.html" $mark }}
+          <span class="pl-cover__num">{{ $no }}</span>
+        </div>
+        <div>
+          <h2 class="pl-card__title">{{ $term.Page.Title | humanize | title }}</h2>
+          <p class="pl-card__byline">Sequenced by {{ site.Params.author | default "the editor" }}</p>
+          <p class="pl-card__note">A {{ $term.Count }}-essay path through {{ $term.Page.Title | humanize | lower }} on this site.</p>
+        </div>
+        <div class="pl-stats">
+          <span><strong>{{ $term.Count }}</strong> essays</span>
+          <span class="pl-stat-sep" aria-hidden></span>
+          <span><strong>{{ $totalMin }}</strong> min reading</span>
+          <span class="pl-stat-sep" aria-hidden></span>
+          <span>{{ $no }}</span>
+        </div>
+
+        <div class="pl-tracklist" aria-hidden="true">
+          <p class="pl-tl__eyebrow">{{ $no }} · Tracklist</p>
+          <h3 class="pl-tl__title">{{ $term.Page.Title | humanize | title }}</h3>
+          {{- range $j, $p := $term.Pages.ByDate }}
+            <div class="pl-track">
+              <span class="pl-track__num">{{ printf "%02d" (add $j 1) }}</span>
+              <span class="pl-track__title">{{ $p.Title }}</span>
+              <span class="pl-track__time">{{ $p.ReadingTime }} min</span>
+            </div>
+          {{- end }}
+        </div>
+      </a>
+    {{- end }}
+  </div>
+</div>
+{{ end }}

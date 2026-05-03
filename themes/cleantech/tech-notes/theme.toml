@@ -1,0 +1,10 @@
+name = "tech-notes"
+license = "MIT"
+description = "Editorial Hugo theme — paper-and-ink, slow reading."
+homepage = "https://blog.notesbysandeep.com"
+tags = ["editorial", "minimal", "blog", "serif"]
+features = ["taxonomies", "rss", "responsive"]
+min_version = "0.110.0"
+
+[author]
+  name = "Sandeep"

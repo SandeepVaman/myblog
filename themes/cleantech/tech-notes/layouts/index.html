@@ -1,0 +1,16 @@
+{{ define "main" }}
+<div class="shell">
+  <p class="eyebrow">{{ with site.Params.description }}{{ . }}{{ else }}Long-form writing{{ end }}</p>
+
+  {{- with site.Params.intro }}
+  <p class="intro">{{ . | safeHTML }}</p>
+  {{- else }}
+  <p class="intro">Long-form writing on databases, distributed systems, and the unreasonable effectiveness of <em>boring technology</em>.</p>
+  {{- end }}
+
+  {{- $posts := where site.RegularPages "Section" "posts" }}
+  {{- range $posts.ByDate.Reverse }}
+    {{ partial "post-row.html" . }}
+  {{- end }}
+</div>
+{{ end }}
