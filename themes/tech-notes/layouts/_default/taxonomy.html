@@ -8,7 +8,8 @@
     these are the <em>mixtapes</em>. Hover a card to peek inside.
   </p>
 
-  {{- $terms := .Data.Terms.Alphabetical }}
+  {{- $terms := slice }}
+  {{- with .Data.Terms }}{{ $terms = .Alphabetical }}{{ end }}
   {{- $totalEssays := 0 }}
   {{- range $terms }}{{ $totalEssays = add $totalEssays .Count }}{{ end }}
 
