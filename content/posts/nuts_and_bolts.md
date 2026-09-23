@@ -1,7 +1,14 @@
 ---
 title: "How BoltDB Works: A High-Level Tour"
 date: 2026-08-20T10:47:26+05:30
-description: "Part 1 of Nuts and Bolt: a tour of BoltDB's pages, B+trees, buckets, transactions, and freelist."
+lastmod: 2026-09-23T14:40:00+05:30
+description: "Learn how BoltDB works under the hood, from memory-mapped pages and B+trees to buckets, MVCC transactions, copy-on-write, and the freelist."
+author: "Sandeep"
+image: "/images/boltdb-high-level-tour.png"
+imageAlt: "How BoltDB Works — pages, B+trees, buckets, MVCC, and copy-on-write"
+imageWidth: 1733
+imageHeight: 908
+keywords: ["BoltDB internals", "B+tree", "MVCC", "copy-on-write", "database storage engine", "Rust database"]
 playlists: ["databases", "boltdb"]
 toc: true
 ---
@@ -339,5 +346,7 @@ And here’s why I went this deep in the first place: at the end of the series, 
 If you’ve ever wondered how databases actually work under the hood, like I did when I stared at MongoDB in production and wished I understood what it was doing, BoltDB is one of the best places to start. It’s small, it’s real, and every idea in it appears again in the bigger systems.
 
 Next up: the page — where the bytes actually live.
+
+Follow the complete [BoltDB series](/playlists/boltdb/) as each part is published.
 
 — Sandeep

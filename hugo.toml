@@ -1,7 +1,8 @@
-baseURL = 'https://blog.notesbysandeep.com'
+baseURL = 'https://tech.notesbysandeep.com'
 languageCode = 'en-us'
 title = 'Build Log'
 theme = 'tech-notes'
+enableRobotsTXT = true
 
 # Pagination
 [pagination]
@@ -10,7 +11,6 @@ theme = 'tech-notes'
 # Taxonomies
 [taxonomies]
   playlist = 'playlists'
-  category = 'categories'
 
 # Syntax highlighting
 [markup]
@@ -49,10 +49,19 @@ theme = 'tech-notes'
 
 # Site params
 [params]
-  description = 'A tech blog about software engineering, distributed systems, and more.'
-  author = 'Sundeep'
+  homeTitle = 'Build Log — Database Internals & Distributed Systems by Sandeep'
+  description = 'Deep technical articles about database internals, distributed systems, Rust, BoltDB, B+trees, MVCC, and storage engines.'
+  author = 'Sandeep'
+  authorURL = '/about/'
+  defaultImage = '/images/social-card.png'
+  defaultImageAlt = 'Build Log — database internals, distributed systems, and Rust'
+  defaultImageWidth = 1732
+  defaultImageHeight = 908
+  since = '2026'
+  # Add the verification token from Google Search Console when the property is created.
+  # googleSiteVerification = 'verification-token'
 
   [params.social]
-    # github = 'SandeepVaman'
-    # twitter = 'sandeepvbujire'
-    # linkedin = 'sandeep-vb-335b8097'
+    github = 'SandeepVaman'
+    twitter = 'sandeepvbujire'
+    linkedin = 'sandeep-vb-335b8097'

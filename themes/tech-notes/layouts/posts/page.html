@@ -1,7 +1,8 @@
 {{ define "main" }}
 <article class="article">
   <div class="article__meta">
-    <span><strong>{{ .Date.Format "January 2, 2006" }}</strong></span>
+    <time datetime="{{ .Date.Format "2006-01-02" }}"><strong>{{ .Date.Format "January 2, 2006" }}</strong></time>
+    <span>By <a rel="author" href="{{ "about/" | relURL }}">{{ .Params.author | default site.Params.author }}</a></span>
     <span>{{ .ReadingTime }} min read</span>
     {{- range .Params.playlists }}
       <span><a href="{{ "playlists/" | relURL }}{{ . | urlize }}/">#{{ . }}</a></span>
