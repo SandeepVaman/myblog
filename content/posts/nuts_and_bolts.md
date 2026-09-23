@@ -1,10 +1,12 @@
-How BoltDB Works: A High-Level Tour
-
-This is Part 1 of Nuts and Bolt, a series where we break down the BoltDB key-value store piece by piece and, in the end, rebuild it in Rust.
-
+---
+title: "How BoltDB Works: A High-Level Tour"
+date: 2026-08-20T10:47:26+05:30
+description: "Part 1 of Nuts and Bolt: a tour of BoltDB's pages, B+trees, buckets, transactions, and freelist."
+playlists: ["databases", "boltdb"]
+toc: true
 ---
 
-Starting with a drawer
+## Starting with a drawer
 
 I’ve never been great at putting things back where they belong. Tools end up in the nearest drawer, cables get tossed in a box 'for now,' and small parts are scattered around the house. Everything seems fine until I actually need the 10mm socket, and then I’m turning the garage upside down while the job waits.
 
@@ -18,12 +20,14 @@ This series is my way of sharing what I learned. This first post is the map: it 
 
 ---
 
-What is a key-value store, really?
+## What is a key-value store, really?
 
 At its simplest, a key-value store is a persistent version of a data structure you already know: a map / dictionary / hash table.
 
+```text
 db.put("user:42", "Sandeep")
 db.get("user:42")   // → "Sandeep"
+```
 
 You hand it a key and a value, both just bags of bytes. Later you hand it the key and get the value back. That’s the whole contract.
 
@@ -40,10 +44,11 @@ That rule—one process, one file—is not a weakness. It’s the design choice 
 
 ---
 
-The big picture
+## The big picture
 
 Here’s BoltDB in one diagram. Don’t worry about the details yet; we’ll walk through each layer soon.
 
+```text
       Your code
          │  db.Update / db.View
          ▼
@@ -70,12 +75,13 @@ Here’s BoltDB in one diagram. Don’t worry about the details yet; we’ll wal
    ┌───────────────┐
    │ One .db file  │   memory-mapped into your process
    └───────────────┘
+```
 
 From bottom to top: a single file is divided into fixed-size pages. Pages form B+trees. Each bucket is a B+tree, and every read or write happens inside a transaction that sees a consistent snapshot. Now let’s build that stack from the ground up.
 
 ---
 
-Layer 1: One file, carved into pages
+## Layer 1: One file, carved into pages
 
 BoltDB stores everything in a single file. When it opens that file, it doesn’t use the usual read() and write() methods. Instead, it memory-maps the file.
 
@@ -83,6 +89,7 @@ Memory-mapping (mmap) is a neat trick: you ask the operating system to make a fi
 
 That file is divided into equal-sized blocks called pages, typically 4KB each (matching the OS’s own page size). Every page has a small header saying what it is:
 
+```text
 ┌────────────────────────────────────────────┐
 │ Page header:  id │ flags │ count │ overflow │
 ├────────────────────────────────────────────┤
@@ -90,23 +97,25 @@ That file is divided into equal-sized blocks called pages, typically 4KB each (m
 │              page contents…                │
 │                                            │
 └────────────────────────────────────────────┘
+```
 
 There are four kinds of page, distinguished by the flags field:
 
-Column 1	Column 2
-Page type	What it holds
-meta	The database’s root pointer and bookkeeping (see Layer 5)
-freelist	A list of pages that are free to be reused
-branch	Interior B+tree nodes — keys that route you to children
-leaf	The actual key-value pairs (and pointers to sub-buckets)
-
+| Page type | What it holds |
+| --- | --- |
+| `meta` | The database’s root pointer and bookkeeping (see Layer 5) |
+| `freelist` | A list of pages that are free to be reused |
+| `branch` | Interior B+tree nodes — keys that route you to children |
+| `leaf` | The actual key-value pairs (and pointers to sub-buckets) |
 
 A brand-new BoltDB file is tiny: just four pages.
 
+```text
 Page 0: meta      ┐  two copies, for safety
 Page 1: meta      ┘  (see Layer 5)
 Page 2: freelist     "no free pages yet"
 Page 3: leaf         the empty root bucket
+```
 
 The page is the basic unit of BoltDB. Everything above this layer is really just pages linked together, and every read or write eventually comes down to 'which page, at which offset.'
 
@@ -114,7 +123,7 @@ The zero-copy trick: because the file is memory-mapped, BoltDB reads a page by c
 
 ---
 
-Layer 2: The B+tree — keeping keys sorted
+## Layer 2: The B+tree — keeping keys sorted
 
 Pages are how BoltDB stores bytes, but the B+tree is what keeps keys organized so they can be found quickly.
 
@@ -125,6 +134,7 @@ A B+tree is a sorted tree with two kinds of nodes:
 * Branch nodes (the interior nodes) don’t hold values. Instead, they act as signposts: 'keys less than cat are down this way; keys from cat to mouse are down that way.' Their only job is to guide you.
 * Leaf nodes (the bottom row) hold the actual key-value pairs, kept in sorted order.
 
+```text
                     ┌───────────────────────────┐
                     │  Branch node              │
                     │  [ <cat ] [ cat…mouse ]…  │
@@ -137,6 +147,7 @@ A B+tree is a sorted tree with two kinds of nodes:
   │ apple → red     │                      │ cat   → orange       │
   │ banana → yellow │                      │ dog   → brown        │
   └─────────────────┘                      └──────────────────────┘
+```
 
 To look up a key, you start at the top and follow the signposts down until you reach the leaf that should contain it. This only takes a few steps, even with millions of keys. Since leaves are sorted, range scans and ordered iteration are easy: you find your starting key and move sideways.
 
@@ -149,24 +160,26 @@ Two properties make the B+tree a great fit for a disk-backed store:
 
 ---
 
-Layer 3: Buckets — namespaces on top of the tree
+## Layer 3: Buckets — namespaces on top of the tree
 
 You rarely want all your keys in one flat space. You want users separate from sessions separate from config. In BoltDB, those namespaces are called buckets.
 
 Here’s the clever part: a bucket is just its own B+tree. A value in a bucket can be either a plain value or a pointer to another bucket’s tree. This allows buckets to nest:
 
+```text
 Root bucket
 ├── "users"      (a bucket)  ──► its own B+tree of user records
 │     ├── "user:1" → {...}
 │     └── "user:2" → {...}
 ├── "sessions"   (a bucket)  ──► its own B+tree
 └── "config"     → "value"   (a plain key-value pair)
+```
 
 Every database has one hidden root bucket at the very top. Top-level buckets you create are entries in the root bucket’s tree. Buckets inside them are entries in their trees, and so on, all the way down. It’s trees within trees, with the same structure reused at every level. That’s what makes the design feel so tidy. A single meta pointer (Layer 5) points to the root bucket, and from there you can reach every key in the database.
 
 ---
 
-Layer 4: Pages vs. Nodes — disk shape and memory shape
+## Layer 4: Pages vs. Nodes — disk shape and memory shape
 
 Here’s something that confused me at first, but makes things much clearer once you understand it.
 
@@ -175,6 +188,7 @@ BoltDB has two representations of the same tree node, and it uses them at differ
 * A page is the on-disk shape. It’s packed, read-only, and lives inside the memory-mapped file. Reading it is zero-copy; you just point at it.
 * A node is the in-memory shape. It’s a regular heap-allocated struct with a list of entries that can grow. BoltDB creates a node when it needs to modify something.
 
+```text
    Reading                              Writing
    ────────                             ───────
    ┌──────────┐                         ┌──────────┐   materialize   ┌──────────┐
@@ -183,6 +197,7 @@ BoltDB has two representations of the same tree node, and it uses them at differ
    │  read-   │                         └──────────┘   ◄═════════════ │ writable)│
    │  only)   │                              spill (write back)       └──────────┘
    └──────────┘
+```
 
 The rule is:
 
@@ -193,13 +208,14 @@ Notice the word 'fresh.' A write never overwrites the page it read from. That si
 
 ---
 
-Layer 5: Transactions, snapshots, and copy-on-write
+## Layer 5: Transactions, snapshots, and copy-on-write
 
 Everything you do in BoltDB happens inside a transaction. There are two types, and the difference between them is central to the whole design:
 
 * Read-only transactions — you can have many at once.
 * Read-write transactions — there is only ever one at a time.
 
+```go
 // Read-only: many can run concurrently
 db.View(func(tx *bolt.Tx) error {
     b := tx.Bucket([]byte("users"))
@@ -212,11 +228,13 @@ db.Update(func(tx *bolt.Tx) error {
     b, _ := tx.CreateBucketIfNotExists([]byte("users"))
     return b.Put([]byte("user:42"), []byte("Sandeep"))
 })
+```
 
 How can many readers work at the same time while a writer is changing the tree, without anyone seeing a half-finished update or having reads blocked by locks? The answer is copy-on-write (COW), and it’s beautifully simple.
 
 Remember from Layer 4: a writer never changes existing pages. When it needs to update a leaf, it writes a new leaf page somewhere else. Now that the leaf is in a new place, its parent branch must point to the new spot, so the parent is also copied to a new page. This process continues all the way up to the root:
 
+```text
 Before commit                    After a write (copy-on-write)
 
      root  ──► B ──► leaf             root'         ← new root page
@@ -224,6 +242,7 @@ Before commit                    After a write (copy-on-write)
                                     B'      B        ← B' is new, B untouched
                                    ╱  ╲
                               leaf'    leaf          ← leaf' is new
+```
 
 The original pages (root, B, leaf) are left completely untouched. Any reader that started before this write keeps reading the old tree through the old root, seeing a perfectly consistent snapshot frozen at the moment its transaction began. Meanwhile, the writer builds a whole new version of the tree out of new pages.
 
@@ -231,7 +250,7 @@ This is MVCC, or Multi-Version Concurrency Control. Multiple versions of the tre
 
 So what actually makes the writer’s new version “official”? That’s where the meta page comes in.
 
-The meta page: one atomic switch
+### The meta page: one atomic switch
 
 The very first pages of the file (page 0 and page 1) are meta pages. A meta page is small but important: it holds the pointer to the current root bucket, the pointer to the freelist, the latest transaction ID, and a checksum.
 
@@ -245,7 +264,7 @@ So a commit works like this:
 4. Now write a new meta page whose root pointer points at the new tree, with an incremented transaction ID and a fresh checksum.
 5. fsync again.
 
-Step 4 is the key moment. Until the meta page is written, the database still officially points to the old tree, and the new pages sit there, invisible. As soon as the new meta page is written to disk, the database instantly switches to the new version. Never a state where the database is o half-updated.
+Step 4 is the key moment. Until the meta page is written, the database still officially points to the old tree, and the new pages sit there, invisible. As soon as the new meta page is written to disk, the database instantly switches to the new version. Never a state where the database is half-updated.
 
 Why two meta pages? For safety. BoltDB switches between them: even transactions write to page 0, odd ones write to page 1. If the machine loses power while writing a meta page and it gets corrupted, the other meta page still has the last good version. When opening the file, BoltDB reads both, checks their checksums, and picks the valid one with the highest transaction ID. That’s the whole crash-recovery story: there’s no write-ahead log, no replay, and no journal. Either the new meta page was written completely (so you get the new version) or it wasn’t (so you get the previous version). You can never end up in between.
 
@@ -253,7 +272,7 @@ This is what people mean when they say BoltDB is ACID. Transactions are Atomic (
 
 ---
 
-Layer 6: The freelist — recycling pages
+## Layer 6: The freelist — recycling pages
 
 There’s one loose end: if every write creates new pages and leaves the old ones behind, won’t the file keep growing forever?
 
@@ -261,18 +280,20 @@ That’s the job of the freelist. When a transaction commits, the old pages it r
 
 But there’s a subtle detail here. Remember those long-running read transactions still looking at the old tree? We can’t reuse a page while they might still need it. So a freed page isn’t given out right away; it becomes pending until every reader that could still be using it has finished. Only when no live transaction needs the old version does the page become truly free for reuse.
 
+```text
 page replaced by a write
         │
         ▼
    ┌──────────┐   all older readers finished   ┌──────────┐
    │ pending  │ ─────────────────────────────► │   free   │ ──► reused
    └──────────┘                                └──────────┘
+```
 
 So the freelist is what connects MVCC to the physical file. It acts like an accountant, keeping track of exactly when an old version of the tree is safe to overwrite. This is also why a very long-lived read transaction can make a Bolt file grow: it holds old pages hostage, keeping them out of the free pool.
 
 ---
 
-Putting it all together: a day in the life of a write
+## Putting it all together: a day in the life of a write
 
 Let’s follow db.Update as it sets users/user:42 = "Sandeep" from top to bottom, connecting all six layers:
 
@@ -288,7 +309,7 @@ A read (db.View → Get) is just steps 1 and 2, followed by reading the value. T
 
 ---
 
-Why the design is so satisfying
+## Why the design is so satisfying
 
 Take a step back and notice how few ideas are actually involved, and how much each one does:
 
@@ -302,7 +323,7 @@ There’s no write-ahead log, no background compaction thread, and no separate r
 
 ---
 
-Where this series is going
+## Where this series is going
 
 This was the overview. In the coming posts, we’ll explore each part in detail:
 
